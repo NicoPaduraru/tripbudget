@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Liste der Sprachen der App. Ab Android 13 kann man die App-Sprache dadurch
+    in den System-Einstellungen wählen (Einstellungen → Apps → TripBudget → Sprache),
+    unabhängig von der Sprache des Handys.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="de" />
+</locale-config>

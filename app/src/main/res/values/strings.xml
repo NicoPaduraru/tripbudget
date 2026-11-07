@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Standard-Texte (Englisch). Android nimmt diese Datei, wenn es keine
+    passende Sprache gibt. Deutsch steht in res/values-de/strings.xml.
+    Jeder Name (name="...") muss in BEIDEN Dateien vorkommen.
+-->
+<resources>
+    <string name="app_name">TripBudget</string>
+
+    <!-- Reiseliste -->
+    <string name="trip_list_title">My trips</string>
+    <string name="action_new_trip">New trip</string>
+    <string name="trip_list_empty_title">No trips yet</string>
+    <string name="trip_list_empty_text">Plan your first trip and keep your group budget in view.</string>
+    <!-- %1$s wird durch den formatierten Betrag ersetzt -->
+    <string name="trip_budget_label">Budget: %1$s</string>
+    <plurals name="traveler_count">
+        <item quantity="one">%d traveler</item>
+        <item quantity="other">%d travelers</item>
+    </plurals>
+
+    <!-- Reise anlegen -->
+    <string name="add_trip_title">New trip</string>
+    <string name="action_back">Back</string>
+    <string name="field_trip_name">Trip name</string>
+    <string name="field_destination">Destination (optional)</string>
+    <string name="field_dates_empty">Choose travel dates</string>
+    <string name="date_picker_title">Travel dates</string>
+    <string name="field_budget">Total budget</string>
+    <string name="budget_hint">e.g. 1500 or 1500.50</string>
+    <string name="field_currency">Currency</string>
+    <string name="section_travelers">Travelers</string>
+    <string name="field_my_name">Your name</string>
+    <string name="field_add_traveler">Add a person</string>
+    <string name="action_add">Add</string>
+    <string name="action_remove_traveler">Remove %1$s</string>
+    <string name="action_save_trip">Save trip</string>
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Cancel</string>
+
+    <!-- Fehlermeldungen -->
+    <string name="error_name_empty">Please enter a name for the trip.</string>
+    <string name="error_dates_missing">Please choose the travel dates.</string>
+    <string name="error_end_before_start">The end date is before the start date.</string>
+    <string name="error_budget_invalid">Please enter a valid amount greater than 0.</string>
+    <string name="error_my_name_empty">Please enter your name.</string>
+    <string name="error_duplicate_traveler">Each name may only appear once.</string>
+    <!-- 20 = TripFormValidator.MAX_TRAVELERS -->
+    <string name="error_too_many_travelers">A trip can have at most 20 people.</string>
+</resources>

@@ -1,0 +1,66 @@
+# PHASE 6: Continuous Integration (CI) mit GitHub Actions.
+#
+# Bei jedem Push und jedem Pull Request startet GitHub einen frischen Linux-Rechner,
+# lädt den Code herunter und prüft:
+#   1. Laufen alle Unit-Tests?
+#   2. Lässt sich die Release-Version mit R8 bauen?
+#   3. Lässt sich die Debug-APK bauen? (wird als Download angehängt)
+# Schlägt etwas fehl, zeigt GitHub ein rotes ✗ am Commit und schickt dir eine E-Mail.
+
+name: Android CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+  workflow_dispatch:        # erlaubt "Run workflow" per Knopf auf GitHub
+
+permissions:
+  contents: read            # der Workflow darf den Code nur lesen, nichts ändern
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v6
+
+      - name: JDK 25 einrichten
+        # Dein Projekt verlangt Java 25 für Gradle (gradle/gradle-daemon-jvm.properties)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Gradle einrichten (mit Cache)
+        # Prüft auch, dass gradle-wrapper.jar echt ist, und speichert Downloads für den nächsten Lauf
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: gradlew ausführbar machen
+        # Unter Windows committet, fehlt der Datei das "ausführbar"-Recht für Linux
+        run: chmod +x gradlew
+
+      - name: Unit-Tests
+        run: ./gradlew testDebugUnitTest
+
+      - name: Release-Build mit R8 (unsigniert)
+        run: ./gradlew assembleRelease
+
+      - name: Debug-APK bauen
+        run: ./gradlew assembleDebug
+
+      - name: Debug-APK anhängen
+        uses: actions/upload-artifact@v4
+        with:
+          name: tripbudget-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+
+      - name: Testberichte anhängen (nur bei Fehlern)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: app/build/reports/tests/

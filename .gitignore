@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Phase 6
+/.idea/
+/app/release/
+*.jks
+*.keystore

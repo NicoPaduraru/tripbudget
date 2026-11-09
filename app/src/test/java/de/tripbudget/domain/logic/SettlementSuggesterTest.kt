@@ -17,14 +17,14 @@ class SettlementSuggesterTest {
     @Test
     fun `zwei Personen - eine Überweisung`() {
         val transfers = SettlementSuggester.suggest(mapOf(1L to 2500L, 2L to -2500L))
-        assertEquals(listOf(Transfer(fromTravelerId = 2, toTravelerId = 1, amountCents = 2500)), transfers)
+        assertEquals(listOf(Transfer(fromTravelerId = 2, toTravelerId = 1, amountMinorUnits = 2500)), transfers)
     }
 
     @Test
     fun `ein Gläubiger, zwei Schuldner`() {
         val transfers = SettlementSuggester.suggest(mapOf(1L to 6000L, 2L to -3000L, 3L to -3000L))
         assertEquals(2, transfers.size)
-        assertTrue(transfers.all { it.toTravelerId == 1L && it.amountCents == 3000L })
+        assertTrue(transfers.all { it.toTravelerId == 1L && it.amountMinorUnits == 3000L })
     }
 
     @Test
@@ -41,8 +41,8 @@ class SettlementSuggesterTest {
 
             val after = balances.toMutableMap()
             for (t in transfers) {
-                after[t.fromTravelerId] = after.getValue(t.fromTravelerId) + t.amountCents
-                after[t.toTravelerId] = after.getValue(t.toTravelerId) - t.amountCents
+                after[t.fromTravelerId] = after.getValue(t.fromTravelerId) + t.amountMinorUnits
+                after[t.toTravelerId] = after.getValue(t.toTravelerId) - t.amountMinorUnits
             }
             assertTrue("Nicht ausgeglichen: $balances → $after", after.values.all { it == 0L })
             assertTrue("Zu viele Überweisungen: ${transfers.size}", transfers.size <= people - 1)

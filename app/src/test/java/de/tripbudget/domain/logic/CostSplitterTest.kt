@@ -20,13 +20,13 @@ class CostSplitterTest {
     @Test
     fun `teilt glatte Beträge gleichmäßig`() {
         val shares = CostSplitter.splitEvenly(900, listOf(1, 2, 3))
-        assertEquals(listOf(300L, 300L, 300L), shares.map { it.amountCents })
+        assertEquals(listOf(300L, 300L, 300L), shares.map { it.amountMinorUnits })
     }
 
     @Test
     fun `verteilt den Restcent auf die ersten Personen`() {
         val shares = CostSplitter.splitEvenly(1000, listOf(1, 2, 3))
-        assertEquals(listOf(334L, 333L, 333L), shares.map { it.amountCents })
+        assertEquals(listOf(334L, 333L, 333L), shares.map { it.amountMinorUnits })
     }
 
     @Test
@@ -36,7 +36,7 @@ class CostSplitterTest {
             for (people in 1..7) {
                 val ids = (1L..people.toLong()).toList()
                 val shares = CostSplitter.splitEvenly(amount, ids)
-                assertEquals("Betrag $amount, $people Personen", amount, shares.sumOf { it.amountCents })
+                assertEquals("Betrag $amount, $people Personen", amount, shares.sumOf { it.amountMinorUnits })
             }
         }
     }
@@ -44,7 +44,7 @@ class CostSplitterTest {
     @Test
     fun `eine Person bekommt alles`() {
         val shares = CostSplitter.splitEvenly(1234, listOf(5))
-        assertEquals(1234L, shares.single().amountCents)
+        assertEquals(1234L, shares.single().amountMinorUnits)
     }
 
     @Test

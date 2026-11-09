@@ -41,4 +41,119 @@
     <string name="error_my_name_empty">Bitte gib deinen Namen ein.</string>
     <string name="error_duplicate_traveler">Jeder Name darf nur einmal vorkommen.</string>
     <string name="error_too_many_travelers">Eine Reise kann höchstens 20 Personen haben.</string>
+    <!-- ===== Phase 2: Reiseübersicht ===== -->
+    <string name="trip_not_found">Diese Reise gibt es nicht mehr.</string>
+    <string name="action_add_expense">Ausgabe erfassen</string>
+    <string name="budget_remaining_label">Noch verfügbar</string>
+    <string name="budget_spent_of">%1$s von %2$s ausgegeben (%3$d %%)</string>
+    <string name="budget_daily">Pro Tag noch ca. %1$s</string>
+    <plurals name="days_left">
+        <item quantity="one">noch %d Tag</item>
+        <item quantity="other">noch %d Tage</item>
+    </plurals>
+    <string name="budget_trip_over">Die Reise ist vorbei.</string>
+    <string name="budget_warning">Mehr als 80 %% des Budgets sind verbraucht.</string>
+    <string name="budget_over">Budget um %1$s überschritten</string>
+    <string name="expenses_title">Ausgaben</string>
+    <string name="expenses_empty">Noch keine Ausgaben erfasst.</string>
+    <string name="expense_paid_by">bezahlt von %1$s</string>
+    <plurals name="expense_split_count">
+        <item quantity="one">für %d Person</item>
+        <item quantity="other">für %d Personen</item>
+    </plurals>
+
+    <!-- ===== Phase 2: Ausgabe erfassen ===== -->
+    <string name="add_expense_title">Ausgabe erfassen</string>
+    <string name="field_amount">Betrag</string>
+    <string name="field_category">Kategorie</string>
+    <string name="field_description">Beschreibung (optional)</string>
+    <string name="field_date">Datum wählen</string>
+    <string name="field_paid_by">Bezahlt von</string>
+    <string name="field_split_between">Aufteilen auf</string>
+    <string name="per_person_preview">%1$s pro Person</string>
+    <string name="me_suffix">%1$s (ich)</string>
+    <string name="action_save_expense">Ausgabe speichern</string>
+
+    <!-- Kategorien -->
+    <string name="category_accommodation">Unterkunft</string>
+    <string name="category_transport">Transport</string>
+    <string name="category_food">Essen &amp; Trinken</string>
+    <string name="category_activities">Aktivitäten</string>
+    <string name="category_shopping">Einkaufen</string>
+    <string name="category_other">Sonstiges</string>
+
+    <string name="error_amount_invalid">Bitte gib einen gültigen Betrag größer als 0 ein.</string>
+    <string name="error_category_missing">Bitte wähle eine Kategorie.</string>
+    <string name="error_date_missing">Bitte wähle ein Datum.</string>
+    <string name="error_payer_missing">Bitte wähle, wer bezahlt hat.</string>
+    <string name="error_no_participants">Wähle mindestens eine Person.</string>
+    <!-- ===== Phase 3: Tabs und Abrechnung ===== -->
+    <string name="tab_expenses">Ausgaben</string>
+    <string name="tab_settlement">Abrechnung</string>
+    <string name="settlement_balances_title">Salden</string>
+    <string name="settlement_suggestions_title">So wird ausgeglichen</string>
+    <string name="settlement_history_title">Erledigte Zahlungen</string>
+    <string name="balance_gets">bekommt %1$s</string>
+    <string name="balance_owes">schuldet %1$s</string>
+    <string name="balance_even">quitt</string>
+    <string name="balance_details">bezahlt %1$s · Anteil %2$s</string>
+    <string name="transfer_from_to">%1$s → %2$s</string>
+    <string name="action_mark_paid">Bezahlt</string>
+    <string name="settlement_all_settled">Alle sind quitt. Niemand schuldet jemandem etwas.</string>
+    <string name="settlement_paid_on">bezahlt am %1$s</string>
+    <string name="action_undo">Rückgängig</string>
+    <!-- ===== Phase 4: Reiseplan ===== -->
+    <string name="tab_plan">Plan</string>
+    <string name="action_add_plan_item">Aktivität planen</string>
+    <string name="plan_hint">Plane Aktivitäten für jeden Tag deiner Reise.</string>
+    <string name="plan_total_open">Geplant, noch nicht bezahlt: %1$s</string>
+    <string name="plan_day_title">Tag %1$d · %2$s</string>
+    <string name="plan_day_empty">Nichts geplant</string>
+    <string name="plan_all_day">Ganztägig</string>
+    <string name="plan_converted">Als Ausgabe erfasst</string>
+    <string name="action_convert_to_expense">Als Ausgabe erfassen</string>
+    <string name="action_delete_plan_item">%1$s löschen</string>
+    <string name="budget_planned">Geplant: noch %1$s · danach verfügbar: %2$s</string>
+    <string name="expense_from_plan">Aus deinem Plan: %1$s</string>
+    <string name="add_plan_item_title">Aktivität planen</string>
+    <string name="plan_trip_dates">Reise: %1$s</string>
+    <string name="field_plan_title">Was?</string>
+    <string name="field_time">Uhrzeit (optional)</string>
+    <string name="action_clear_time">Uhrzeit entfernen</string>
+    <string name="field_location">Wo? (optional)</string>
+    <string name="field_planned_cost">Geplante Kosten (optional)</string>
+    <string name="plan_cost_hint">Gesamtbetrag für die Gruppe</string>
+    <string name="field_note">Notiz (optional)</string>
+    <string name="action_save_plan_item">Aktivität speichern</string>
+    <string name="error_plan_title_empty">Bitte beschreibe die Aktivität.</string>
+    <string name="error_plan_date_outside_trip">Das Datum muss innerhalb der Reise liegen.</string>
+    <string name="error_plan_cost_invalid">Bitte gib einen gültigen Betrag ein oder lass das Feld leer.</string>
+    <!-- ===== Phase 5: Sicherheit und Einstellungen ===== -->
+    <string name="action_open_settings">Einstellungen</string>
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_section_security">Sicherheit</string>
+    <string name="setting_app_lock">App-Sperre</string>
+    <string name="setting_app_lock_desc">Fingerabdruck, Gesicht oder Geräte-PIN beim Öffnen und nach 1 Minute im Hintergrund</string>
+    <string name="setting_app_lock_unavailable">Bitte richte zuerst eine Displaysperre auf deinem Handy ein.</string>
+    <string name="setting_block_screenshots">Screenshots verhindern</string>
+    <string name="setting_block_screenshots_desc">Blendet auch die Vorschau in der App-Übersicht aus</string>
+    <string name="settings_section_language">Sprache</string>
+    <string name="language_system">System</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_english">English</string>
+    <string name="language_follows_system">Die App verwendet die Sprache deines Handys.</string>
+    <string name="settings_section_data">Daten</string>
+    <string name="action_delete_all_data">Alle Daten löschen</string>
+    <string name="delete_all_title">Alle Daten löschen?</string>
+    <string name="delete_all_text">Alle Reisen, Ausgaben, Zahlungen und Pläne werden endgültig gelöscht. Das lässt sich nicht rückgängig machen.</string>
+    <string name="action_delete">Löschen</string>
+    <string name="delete_all_done">Alle Daten wurden gelöscht.</string>
+    <string name="settings_section_privacy">Datenschutz</string>
+    <string name="privacy_text">TripBudget speichert alle Daten nur auf diesem Gerät, verschlüsselt (AES-256). Die App hat keine Internet-Berechtigung, kein Konto und kein Tracking. Deine Daten sind von Cloud-Backups ausgeschlossen.</string>
+    <string name="lock_title">TripBudget ist gesperrt</string>
+    <string name="lock_text">Entsperre mit Fingerabdruck, Gesicht oder Geräte-PIN.</string>
+    <string name="action_unlock">Entsperren</string>
+    <string name="lock_prompt_title">TripBudget entsperren</string>
+    <string name="lock_prompt_subtitle">Bestätige, dass du es bist</string>
+    <string name="lock_unavailable">Keine Displaysperre eingerichtet. Die App-Sperre wurde ausgeschaltet.</string>
 </resources>

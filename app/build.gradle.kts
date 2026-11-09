@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -59,4 +60,17 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.sqlcipher.android)
+    implementation(libs.androidx.sqlite)
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.datastore.preferences)
+    // Hilt: Dependency Injection
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)          // erzeugt beim Bauen den Code für Hilt (wie bei Room)
+
+// hiltViewModel() für Compose-Bildschirme
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+}
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }

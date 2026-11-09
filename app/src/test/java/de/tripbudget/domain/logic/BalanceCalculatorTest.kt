@@ -1,12 +1,14 @@
 package de.tripbudget.domain.logic
 
 import de.tripbudget.domain.model.Expense
+import de.tripbudget.domain.model.ExpenseCategory
 import de.tripbudget.domain.model.Share
 import de.tripbudget.domain.model.Transfer
 import de.tripbudget.domain.model.Traveler
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.Assert.assertThrows
+import java.time.LocalDate
 
 class BalanceCalculatorTest {
 
@@ -14,10 +16,11 @@ class BalanceCalculatorTest {
     private val ben = Traveler(2, "Ben")
     private val clara = Traveler(3, "Clara")
     private val all = listOf(anna, ben, clara)
+    private val day = LocalDate.of(2027, 5, 12)
 
     /** Hilfsfunktion, damit die Tests kurz und lesbar bleiben. */
     private fun expense(paidBy: Traveler, cents: Long, forWhom: List<Traveler> = all) =
-        Expense(0, "Test", paidBy.id, cents, CostSplitter.splitEvenly(cents, forWhom.map { it.id }))
+        Expense(0, "Test", ExpenseCategory.OTHER, day, paidBy.id, cents, CostSplitter.splitEvenly(cents, forWhom.map { it.id }))
 
     @Test
     fun `ohne Ausgaben sind alle ausgeglichen`() {
@@ -46,7 +49,7 @@ class BalanceCalculatorTest {
     @Test
     fun `erledigte Ausgleichszahlung verringert die Schulden`() {
         val expenses = listOf(expense(anna, 9000))
-        val paid = listOf(Transfer(fromTravelerId = ben.id, toTravelerId = anna.id, amountCents = 3000))
+        val paid = listOf(Transfer(fromTravelerId = ben.id, toTravelerId = anna.id, amountMinorUnits = 3000))
         val balances = BalanceCalculator.calculate(all, expenses, paid)
         assertEquals(3000L, balances[anna.id])
         assertEquals(0L, balances[ben.id])
@@ -66,7 +69,7 @@ class BalanceCalculatorTest {
 
     @Test
     fun `unbekannte Person führt zu einem Fehler`() {
-        val stranger = Expense(0, "Fremd", 99, 100, listOf(Share(99, 100)))
+        val stranger = Expense(0, "Fremd", ExpenseCategory.OTHER, day, 99, 100, listOf(Share(99, 100)))
         assertThrows(IllegalArgumentException::class.java) { BalanceCalculator.calculate(all, listOf(stranger)) }
     }
 }

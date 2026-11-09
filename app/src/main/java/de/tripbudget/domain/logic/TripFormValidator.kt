@@ -1,6 +1,7 @@
 package de.tripbudget.domain.logic
 
 import de.tripbudget.domain.model.NewTrip
+import de.tripbudget.domain.model.TravelerDraft
 import de.tripbudget.domain.util.MoneyFormatter
 import de.tripbudget.domain.util.MoneyParser
 import java.time.LocalDate
@@ -22,7 +23,11 @@ data class TripFormInput(
     val budgetText: String = "",
     val currencyCode: String = "EUR",
     val myName: String = "",
-    val otherTravelers: List<String> = emptyList(),
+    val myTravelerId: Long? = null,                     // ERWEITERUNG 1: beim Bearbeiten gesetzt
+    val otherTravelers: List<TravelerDraft> = emptyList(),
+    // ERWEITERUNG 1 (nur beim Bearbeiten): Zeitraum, den Ausgaben und Plan schon belegen
+    val usedFrom: LocalDate? = null,
+    val usedUntil: LocalDate? = null,
 )
 
 /** Alle möglichen Fehler. Die UI übersetzt sie in Texte (Deutsch/Englisch). */
@@ -34,6 +39,8 @@ enum class TripFormError {
     MY_NAME_EMPTY,
     DUPLICATE_TRAVELER,
     TOO_MANY_TRAVELERS,
+    TRAVELER_NAME_EMPTY,     // ERWEITERUNG 1: bestehende Person leer umbenannt
+    DATES_EXCLUDE_ENTRIES,   // ERWEITERUNG 1: Ausgaben/Plan lägen außerhalb des Zeitraums
 }
 
 /*
@@ -66,6 +73,8 @@ object TripFormValidator {
             errors += TripFormError.DATES_MISSING
         } else if (end.isBefore(start)) {
             errors += TripFormError.END_BEFORE_START
+        } else if (excludesUsedDates(start, end, input)) {
+            errors += TripFormError.DATES_EXCLUDE_ENTRIES
         }
 
         // 3. Budget (abhängig von der Währung: EUR 2 Nachkommastellen, JPY 0)
@@ -76,8 +85,12 @@ object TripFormValidator {
         // 4. Mitreisende: ich + andere, keine leeren Namen, keine doppelten
         val myName = input.myName.trim()
         if (myName.isEmpty()) errors += TripFormError.MY_NAME_EMPTY
-        val others = input.otherTravelers.map { it.trim() }.filter { it.isNotEmpty() }
-        val allNames = listOf(myName) + others
+        val trimmed = input.otherTravelers.map { it.copy(name = it.name.trim()) }
+        // Eine NEUE Person ohne Namen fällt einfach weg.
+        // Eine BESTEHENDE Person ohne Namen ist ein Fehler: Wegfallen hieße löschen.
+        if (trimmed.any { it.id != null && it.name.isEmpty() }) errors += TripFormError.TRAVELER_NAME_EMPTY
+        val others = trimmed.filter { it.name.isNotEmpty() }
+        val allNames = listOf(myName) + others.map { it.name }
         if (allNames.map { it.lowercase() }.toSet().size != allNames.size) {
             errors += TripFormError.DUPLICATE_TRAVELER
         }
@@ -97,9 +110,16 @@ object TripFormValidator {
                 endDate = end,
                 budgetMinorUnits = budget,
                 currencyCode = input.currencyCode,
-                myName = myName,
-                otherTravelerNames = others,
+                me = TravelerDraft(id = input.myTravelerId, name = myName),
+                others = others,
             )
         )
+    }
+
+    /** true, wenn eine Ausgabe oder Aktivität vor dem Beginn oder nach dem Ende läge. */
+    private fun excludesUsedDates(start: LocalDate, end: LocalDate, input: TripFormInput): Boolean {
+        val tooLate = input.usedFrom != null && input.usedFrom.isBefore(start)
+        val tooEarly = input.usedUntil != null && input.usedUntil.isAfter(end)
+        return tooLate || tooEarly
     }
 }

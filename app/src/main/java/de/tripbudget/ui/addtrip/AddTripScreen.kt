@@ -2,6 +2,7 @@ package de.tripbudget.ui.addtrip
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +53,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import de.tripbudget.R
 import de.tripbudget.domain.logic.TripFormError
 import de.tripbudget.domain.logic.TripFormInput
+import de.tripbudget.domain.model.TravelerDraft
 import de.tripbudget.ui.common.formatDateRange
 import de.tripbudget.ui.common.messageRes
 import de.tripbudget.ui.common.toLocalDate
@@ -62,7 +65,7 @@ import java.time.LocalDate
 private val SUPPORTED_CURRENCIES = listOf("EUR", "USD", "GBP", "CHF", "JPY")
 
 /*
- * BILDSCHIRM 2: Reise anlegen.
+ * BILDSCHIRM 2: Reise anlegen – und seit ERWEITERUNG 1 auch bearbeiten.
  * Wie bei der Reiseliste: AddTripScreen (mit ViewModel) + AddTripForm (nur Anzeige).
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,7 +88,9 @@ fun AddTripScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.add_trip_title)) },
+                title = {
+                    Text(stringResource(if (uiState.isEditMode) R.string.edit_trip_title else R.string.add_trip_title))
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -97,20 +102,28 @@ fun AddTripScreen(
             )
         },
     ) { innerPadding ->
-        AddTripForm(
-            uiState = uiState,
-            onNameChange = viewModel::onNameChange, // "::" = Verweis auf eine Funktion
-            onDestinationChange = viewModel::onDestinationChange,
-            onPickDates = { showDatePicker = true },
-            onBudgetChange = viewModel::onBudgetChange,
-            onCurrencyChange = viewModel::onCurrencyChange,
-            onMyNameChange = viewModel::onMyNameChange,
-            onNewTravelerNameChange = viewModel::onNewTravelerNameChange,
-            onAddTraveler = viewModel::addTraveler,
-            onRemoveTraveler = viewModel::removeTraveler,
-            onSave = viewModel::save,
-            modifier = Modifier.padding(innerPadding),
-        )
+        // ERWEITERUNG 1: beim Bearbeiten erst laden, dann das Formular zeigen
+        if (uiState.isLoading || uiState.notFound) {
+            Box(Modifier.fillMaxSize().padding(innerPadding).padding(32.dp), contentAlignment = Alignment.Center) {
+                if (uiState.notFound) Text(stringResource(R.string.trip_not_found)) else CircularProgressIndicator()
+            }
+        } else {
+            AddTripForm(
+                uiState = uiState,
+                onNameChange = viewModel::onNameChange, // "::" = Verweis auf eine Funktion
+                onDestinationChange = viewModel::onDestinationChange,
+                onPickDates = { showDatePicker = true },
+                onBudgetChange = viewModel::onBudgetChange,
+                onCurrencyChange = viewModel::onCurrencyChange,
+                onMyNameChange = viewModel::onMyNameChange,
+                onNewTravelerNameChange = viewModel::onNewTravelerNameChange,
+                onAddTraveler = viewModel::addTraveler,
+                onTravelerNameChange = viewModel::onTravelerNameChange,
+                onRemoveTraveler = viewModel::removeTraveler,
+                onSave = viewModel::save,
+                modifier = Modifier.padding(innerPadding),
+            )
+        }
     }
 
     if (showDatePicker) {
@@ -138,6 +151,7 @@ private fun AddTripForm(
     onMyNameChange: (String) -> Unit,
     onNewTravelerNameChange: (String) -> Unit,
     onAddTraveler: () -> Unit,
+    onTravelerNameChange: (Int, String) -> Unit,
     onRemoveTraveler: (Int) -> Unit,
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
@@ -196,7 +210,7 @@ private fun AddTripForm(
                 }
             )
         }
-        ErrorLine(errors, TripFormError.DATES_MISSING, TripFormError.END_BEFORE_START)
+        ErrorLine(errors, TripFormError.DATES_MISSING, TripFormError.END_BEFORE_START, TripFormError.DATES_EXCLUDE_ENTRIES)
 
         // --- Budget + Währung ---
         OutlinedTextField(
@@ -223,9 +237,11 @@ private fun AddTripForm(
                     selected = code == input.currencyCode,
                     onClick = { onCurrencyChange(code) },
                     label = { Text(code) },
+                    enabled = !uiState.currencyLocked, // ERWEITERUNG 1: fest, sobald es Ausgaben gibt
                 )
             }
         }
+        if (uiState.currencyLocked) HintLine(stringResource(R.string.hint_currency_locked))
 
         // --- Mitreisende ---
         Text(
@@ -247,24 +263,31 @@ private fun AddTripForm(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // Bereits hinzugefügte Personen, jeweils mit "Entfernen"-Knopf
-        input.otherTravelers.forEachIndexed { index, name ->
-            Row(
+        /*
+         * Bereits hinzugefügte Personen. ERWEITERUNG 1: als Textfeld, damit man sie umbenennen kann.
+         * Personen mit Ausgaben oder Zahlungen bekommen keinen aktiven "Entfernen"-Knopf.
+         */
+        input.otherTravelers.forEachIndexed { index, traveler ->
+            val locked = traveler.id != null && traveler.id in uiState.lockedTravelerIds
+            OutlinedTextField(
+                value = traveler.name,
+                onValueChange = { onTravelerNameChange(index, it) },
+                singleLine = true,
+                isError = TripFormError.TRAVELER_NAME_EMPTY in errors && traveler.id != null && traveler.name.isBlank(),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                trailingIcon = {
+                    IconButton(onClick = { onRemoveTraveler(index) }, enabled = !locked) {
+                        Icon(
+                            painter = painterResource(if (locked) R.drawable.ic_lock else R.drawable.ic_close),
+                            contentDescription = stringResource(R.string.action_remove_traveler, traveler.name),
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f).padding(start = 4.dp),
-                )
-                IconButton(onClick = { onRemoveTraveler(index) }) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        contentDescription = stringResource(R.string.action_remove_traveler, name),
-                    )
-                }
-            }
+            )
+        }
+        if (input.otherTravelers.any { it.id in uiState.lockedTravelerIds }) {
+            HintLine(stringResource(R.string.hint_traveler_locked))
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -289,7 +312,12 @@ private fun AddTripForm(
                 Text(stringResource(R.string.action_add))
             }
         }
-        ErrorLine(errors, TripFormError.DUPLICATE_TRAVELER, TripFormError.TOO_MANY_TRAVELERS)
+        ErrorLine(
+            errors,
+            TripFormError.TRAVELER_NAME_EMPTY,
+            TripFormError.DUPLICATE_TRAVELER,
+            TripFormError.TOO_MANY_TRAVELERS,
+        )
 
         // --- Speichern ---
         Button(
@@ -297,7 +325,7 @@ private fun AddTripForm(
             enabled = !uiState.isSaving,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         ) {
-            Text(stringResource(R.string.action_save_trip))
+            Text(stringResource(if (uiState.isEditMode) R.string.action_save_changes else R.string.action_save_trip))
         }
     }
 }
@@ -326,6 +354,17 @@ private fun ErrorLine(errors: Set<TripFormError>, vararg relevant: TripFormError
     Text(
         text = stringResource(error.messageRes()),
         color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(start = 16.dp),
+    )
+}
+
+/** ERWEITERUNG 1: grauer Hinweis, warum etwas gesperrt ist. */
+@Composable
+private fun HintLine(text: String) {
+    Text(
+        text = text,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,
         modifier = Modifier.padding(start = 16.dp),
     )
@@ -394,14 +433,18 @@ private fun AddTripFormPreview() {
                     endDate = LocalDate.of(2027, 5, 19),
                     budgetText = "abc",
                     myName = "Nico",
-                    otherTravelers = listOf("Anna", "Ben"),
+                    myTravelerId = 1,
+                    otherTravelers = listOf(TravelerDraft(2, "Anna"), TravelerDraft(3, "Ben")),
                 ),
                 errors = setOf(TripFormError.BUDGET_INVALID),
                 showErrors = true,
+                isEditMode = true,
+                currencyLocked = true,
+                lockedTravelerIds = setOf(2),
             ),
             onNameChange = {}, onDestinationChange = {}, onPickDates = {}, onBudgetChange = {},
             onCurrencyChange = {}, onMyNameChange = {}, onNewTravelerNameChange = {},
-            onAddTraveler = {}, onRemoveTraveler = {}, onSave = {},
+            onAddTraveler = {}, onTravelerNameChange = { _, _ -> }, onRemoveTraveler = {}, onSave = {},
         )
     }
 }

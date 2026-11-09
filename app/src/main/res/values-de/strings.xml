@@ -156,4 +156,16 @@
     <string name="lock_prompt_title">TripBudget entsperren</string>
     <string name="lock_prompt_subtitle">Bestätige, dass du es bist</string>
     <string name="lock_unavailable">Keine Displaysperre eingerichtet. Die App-Sperre wurde ausgeschaltet.</string>
+
+    <!-- Erweiterung 1: Reise bearbeiten und löschen -->
+    <string name="edit_trip_title">Reise bearbeiten</string>
+    <string name="action_save_changes">Änderungen speichern</string>
+    <string name="action_edit_trip">Reise bearbeiten</string>
+    <string name="action_delete_trip">Reise löschen</string>
+    <string name="delete_trip_title">Reise löschen?</string>
+    <string name="delete_trip_text">„%1$s“ wird mit allen Ausgaben, Plänen und Zahlungen endgültig gelöscht.</string>
+    <string name="hint_currency_locked">Die Währung lässt sich nicht mehr ändern, weil es schon Ausgaben gibt.</string>
+    <string name="hint_traveler_locked">Personen mit Ausgaben oder Zahlungen können nicht entfernt werden.</string>
+    <string name="error_traveler_name_empty">Jede Person braucht einen Namen.</string>
+    <string name="error_dates_exclude_entries">Es gibt Ausgaben oder Aktivitäten außerhalb dieses Zeitraums.</string>
 </resources>

@@ -19,7 +19,7 @@ Built with Kotlin and Jetpack Compose as a portfolio project. No account, no ser
 
 ## Features
 
-- **Trips**: dates, budget, currency and fellow travelers
+- **Trips**: dates, budget, currency and fellow travelers; edit or delete a trip at any time (with safeguards for data already in use)
 - **Day-by-day plan**: activities with time, place and planned cost; one tap turns an activity into a pre-filled expense
 - **Expenses**: amount, category, date, who paid, split between whom (cent-exact even split)
 - **Budget overview**: remaining budget, daily budget, planned costs, warning at 80 %

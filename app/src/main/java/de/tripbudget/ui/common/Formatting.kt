@@ -51,6 +51,8 @@ fun TripFormError.messageRes(): Int = when (this) {
     TripFormError.MY_NAME_EMPTY -> R.string.error_my_name_empty
     TripFormError.DUPLICATE_TRAVELER -> R.string.error_duplicate_traveler
     TripFormError.TOO_MANY_TRAVELERS -> R.string.error_too_many_travelers
+    TripFormError.TRAVELER_NAME_EMPTY -> R.string.error_traveler_name_empty
+    TripFormError.DATES_EXCLUDE_ENTRIES -> R.string.error_dates_exclude_entries
 }
 
 @StringRes

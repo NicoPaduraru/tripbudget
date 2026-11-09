@@ -22,18 +22,25 @@ import de.tripbudget.ui.triplist.TripListScreen
  *   - "trip/7/add_expense"                → normale neue Ausgabe (planItemId = -1)
  *   - "trip/7/add_expense?planItemId=3"   → Ausgabe aus Aktivität 3, vorausgefüllt
  * Optionale Parameter brauchen einen Standardwert (defaultValue).
+ *
+ * ERWEITERUNG 1: "add_trip?tripId=7" öffnet denselben Bildschirm zum Bearbeiten.
  */
 object Routes {
     const val ARG_TRIP_ID = "tripId"
     const val ARG_PLAN_ITEM_ID = "planItemId"
     const val NO_PLAN_ITEM = -1L
+    const val NO_TRIP = -1L
 
     const val TRIP_LIST = "trip_list"
-    const val ADD_TRIP = "add_trip"
+    const val ADD_TRIP = "add_trip?$ARG_TRIP_ID={$ARG_TRIP_ID}"
     const val TRIP_DETAIL = "trip/{$ARG_TRIP_ID}"
     const val ADD_EXPENSE = "trip/{$ARG_TRIP_ID}/add_expense?$ARG_PLAN_ITEM_ID={$ARG_PLAN_ITEM_ID}"
     const val ADD_PLAN_ITEM = "trip/{$ARG_TRIP_ID}/add_plan_item"
     const val SETTINGS = "settings"
+
+    fun addTrip() = "add_trip"
+
+    fun editTrip(tripId: Long) = "add_trip?$ARG_TRIP_ID=$tripId"
 
     fun tripDetail(tripId: Long) = "trip/$tripId"
 
@@ -44,6 +51,12 @@ object Routes {
 }
 
 private val tripIdArgument = navArgument(Routes.ARG_TRIP_ID) { type = NavType.LongType }
+
+/** ERWEITERUNG 1: optionale Reise-ID für "Reise bearbeiten" (-1 = neue Reise). */
+private val optionalTripIdArgument = navArgument(Routes.ARG_TRIP_ID) {
+    type = NavType.LongType
+    defaultValue = Routes.NO_TRIP
+}
 
 private val planItemIdArgument = navArgument(Routes.ARG_PLAN_ITEM_ID) {
     type = NavType.LongType
@@ -57,12 +70,12 @@ fun TripBudgetNavHost(
     NavHost(navController = navController, startDestination = Routes.TRIP_LIST) {
         composable(Routes.TRIP_LIST) {
             TripListScreen(
-                onAddTrip = { navController.navigate(Routes.ADD_TRIP) },
+                onAddTrip = { navController.navigate(Routes.addTrip()) },
                 onTripClick = { tripId -> navController.navigate(Routes.tripDetail(tripId)) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
             )
         }
-        composable(Routes.ADD_TRIP) {
+        composable(Routes.ADD_TRIP, arguments = listOf(optionalTripIdArgument)) {
             AddTripScreen(
                 onBack = { navController.popBackStack() },
                 onSaved = { navController.popBackStack() },
@@ -75,6 +88,9 @@ fun TripBudgetNavHost(
                 onAddExpense = { navController.navigate(Routes.addExpense(tripId)) },
                 onAddPlanItem = { navController.navigate(Routes.addPlanItem(tripId)) },
                 onConvertPlanItem = { planItemId -> navController.navigate(Routes.addExpense(tripId, planItemId)) },
+                onEditTrip = { navController.navigate(Routes.editTrip(tripId)) },
+                // Nach dem Löschen zurück zur Reiseliste (die Reise gibt es ja nicht mehr)
+                onTripDeleted = { navController.popBackStack(Routes.TRIP_LIST, inclusive = false) },
             )
         }
         composable(Routes.ADD_EXPENSE, arguments = listOf(tripIdArgument, planItemIdArgument)) {

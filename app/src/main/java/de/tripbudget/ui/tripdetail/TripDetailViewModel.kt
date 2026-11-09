@@ -22,8 +22,10 @@ import de.tripbudget.domain.repository.PlanRepository
 import de.tripbudget.domain.repository.SettlementRepository
 import de.tripbudget.domain.repository.TripRepository
 import de.tripbudget.ui.navigation.Routes
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -80,7 +82,7 @@ data class TripDetailUiState(
 @HiltViewModel
 class TripDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    tripRepository: TripRepository,
+    private val tripRepository: TripRepository,
     expenseRepository: ExpenseRepository,
     private val settlementRepository: SettlementRepository,
     private val planRepository: PlanRepository,
@@ -108,6 +110,21 @@ class TripDetailViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = TripDetailUiState(isLoading = true),
         )
+
+    /*
+     * ERWEITERUNG 1: Wurde die Reise gelöscht? Ein eigener kleiner StateFlow, weil das ein
+     * einmaliges Ereignis ist ("jetzt zurück zur Liste"), kein Teil der angezeigten Daten.
+     */
+    private val _isDeleted = MutableStateFlow(false)
+    val isDeleted: StateFlow<Boolean> = _isDeleted.asStateFlow()
+
+    fun deleteTrip() {
+        if (_isDeleted.value) return
+        viewModelScope.launch {
+            tripRepository.deleteTrip(tripId)
+            _isDeleted.value = true
+        }
+    }
 
     private var isMarking = false
 

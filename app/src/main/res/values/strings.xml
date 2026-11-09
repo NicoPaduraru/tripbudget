@@ -165,4 +165,16 @@
     <string name="lock_prompt_title">Unlock TripBudget</string>
     <string name="lock_prompt_subtitle">Confirm it is you</string>
     <string name="lock_unavailable">No screen lock is set up. The app lock has been turned off.</string>
+
+    <!-- Erweiterung 1: Reise bearbeiten und löschen -->
+    <string name="edit_trip_title">Edit trip</string>
+    <string name="action_save_changes">Save changes</string>
+    <string name="action_edit_trip">Edit trip</string>
+    <string name="action_delete_trip">Delete trip</string>
+    <string name="delete_trip_title">Delete trip?</string>
+    <string name="delete_trip_text">“%1$s” will be permanently deleted, including all expenses, plans and payments.</string>
+    <string name="hint_currency_locked">The currency can no longer be changed because there are already expenses.</string>
+    <string name="hint_traveler_locked">People with expenses or payments cannot be removed.</string>
+    <string name="error_traveler_name_empty">Every person needs a name.</string>
+    <string name="error_dates_exclude_entries">There are expenses or activities outside this period.</string>
 </resources>

@@ -4,17 +4,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -67,11 +71,20 @@ fun TripDetailScreen(
     onAddExpense: () -> Unit,
     onAddPlanItem: () -> Unit,
     onConvertPlanItem: (Long) -> Unit,
+    onEditTrip: () -> Unit,
+    onTripDeleted: () -> Unit,
     viewModel: TripDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isDeleted by viewModel.isDeleted.collectAsStateWithLifecycle()
     // Welcher Tab gewählt ist, betrifft nur die Anzeige → Zustand in der UI, nicht im ViewModel
     var selectedTab by rememberSaveable { mutableStateOf(TripTab.EXPENSES) }
+    // ERWEITERUNG 1: Sicherheitsabfrage vor dem Löschen sichtbar?
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(isDeleted) {
+        if (isDeleted) onTripDeleted()
+    }
 
     TripDetailContent(
         uiState = uiState,
@@ -84,7 +97,29 @@ fun TripDetailScreen(
         onDeletePlanItem = viewModel::deletePlanItem,
         onMarkPaid = viewModel::markAsPaid,
         onUndoSettlement = viewModel::undoSettlement,
+        onEditTrip = onEditTrip,
+        onDeleteTrip = { confirmDelete = true },
     )
+
+    val tripName = uiState.trip?.name
+    if (confirmDelete && tripName != null) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(stringResource(R.string.delete_trip_title)) },
+            text = { Text(stringResource(R.string.delete_trip_text, tripName)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = false
+                    viewModel.deleteTrip()
+                }) {
+                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) }
+            },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +135,8 @@ fun TripDetailContent(
     onDeletePlanItem: (Long) -> Unit,
     onMarkPaid: (Transfer) -> Unit,
     onUndoSettlement: (Long) -> Unit,
+    onEditTrip: () -> Unit,
+    onDeleteTrip: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val trip = uiState.trip
@@ -112,6 +149,17 @@ fun TripDetailContent(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(painterResource(R.drawable.ic_arrow_back), stringResource(R.string.action_back))
+                    }
+                },
+                // ERWEITERUNG 1: Knöpfe rechts in der oberen Leiste
+                actions = {
+                    if (trip != null) {
+                        IconButton(onClick = onEditTrip) {
+                            Icon(painterResource(R.drawable.ic_edit), stringResource(R.string.action_edit_trip))
+                        }
+                        IconButton(onClick = onDeleteTrip) {
+                            Icon(painterResource(R.drawable.ic_delete), stringResource(R.string.action_delete_trip))
+                        }
                     }
                 },
             )
@@ -221,7 +269,7 @@ private fun previewState(): TripDetailUiState {
 @Composable
 private fun ExpensesTabPreview() {
     TripBudgetTheme {
-        TripDetailContent(previewState(), TripTab.EXPENSES, {}, {}, {}, {}, {}, {}, {}, {})
+        TripDetailContent(previewState(), TripTab.EXPENSES, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
     }
 }
 
@@ -229,7 +277,7 @@ private fun ExpensesTabPreview() {
 @Composable
 private fun SettlementTabPreview() {
     TripBudgetTheme {
-        TripDetailContent(previewState(), TripTab.SETTLEMENT, {}, {}, {}, {}, {}, {}, {}, {})
+        TripDetailContent(previewState(), TripTab.SETTLEMENT, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
     }
 }
 
@@ -237,6 +285,6 @@ private fun SettlementTabPreview() {
 @Composable
 private fun PlanTabPreview() {
     TripBudgetTheme {
-        TripDetailContent(previewState(), TripTab.PLAN, {}, {}, {}, {}, {}, {}, {}, {})
+        TripDetailContent(previewState(), TripTab.PLAN, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
     }
 }
